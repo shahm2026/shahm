@@ -85,7 +85,7 @@ export const AnalyticsDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white p-4 rounded-2xl border border-[#8A949E]/20 shadow-sm space-y-1">
+        <div className="stitch-card p-4 space-y-1">
           <div className="flex items-center justify-between text-[#6B7280]">
             <span className="text-xs">المسجلين</span>
             <Users className="w-4 h-4 text-[#2F6FED]" />
@@ -96,7 +96,7 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-[#8A949E]/20 shadow-sm space-y-1">
+        <div className="stitch-card p-4 space-y-1">
           <div className="flex items-center justify-between text-[#6B7280]">
             <span className="text-xs">المشاوير المنشورة</span>
             <Car className="w-4 h-4 text-[#1E8E5A]" />
@@ -105,7 +105,7 @@ export const AnalyticsDashboard: React.FC = () => {
           <div className="text-[11px] text-[#146B44] font-medium">خدمة لوجه الله تعالى</div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-[#8A949E]/20 shadow-sm space-y-1">
+        <div className="stitch-card p-4 space-y-1">
           <div className="flex items-center justify-between text-[#6B7280]">
             <span className="text-xs">نسبة الإنجاز والتوصيل</span>
             <CheckCircle2 className="w-4 h-4 text-[#146B44]" />
@@ -114,7 +114,7 @@ export const AnalyticsDashboard: React.FC = () => {
           <div className="text-[11px] text-[#6B7280]">{kpis?.completed_trips || 0} مشوار مكتمل</div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-[#8A949E]/20 shadow-sm space-y-1">
+        <div className="stitch-card p-4 space-y-1">
           <div className="flex items-center justify-between text-[#6B7280]">
             <span className="text-xs">نسبة الإلغاء</span>
             <XCircle className="w-4 h-4 text-[#B53A3A]" />
@@ -125,7 +125,7 @@ export const AnalyticsDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-[#8A949E]/20 shadow-sm space-y-3">
+        <div className="stitch-card p-5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#146B44]" />
@@ -148,7 +148,7 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#8A949E]/20 shadow-sm space-y-3">
+        <div className="stitch-card p-5 space-y-3">
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-[#2F6FED]" />
             <h2 className="text-sm font-bold text-[#1F2430]">أوقات الذروة واحتياج النقل</h2>

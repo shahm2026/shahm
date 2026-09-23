@@ -52,7 +52,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="bg-white rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-lg text-right">
+      <div className="stitch-card w-full max-w-sm space-y-4 p-6 text-right">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-[#FCEAEA] text-[#B53A3A] rounded-lg">

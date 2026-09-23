@@ -14,7 +14,7 @@ export const EmptyVolunteersFeed: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-[#8A949E]/20 text-center space-y-3">
+    <div className="stitch-card p-6 text-center space-y-3">
       <div className="w-12 h-12 bg-[#F7F8F9] rounded-full flex items-center justify-center mx-auto text-[#6B7280]">
         <Clock className="w-6 h-6" />
       </div>

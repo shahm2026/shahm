@@ -47,6 +47,8 @@ export interface PublicTrip {
 
 export interface NearbyTrip {
   id: string;
+  requester_id?: string;
+  volunteer_id?: string | null;
   origin_area_label: string;
   destination_area_label: string;
   status: TripStatus;
@@ -54,12 +56,11 @@ export interface NearbyTrip {
   created_at: string;
   scheduled_at: string | null;
   distance_km?: number;
-  patient_age?: number | null;
-  patient_condition?: string | null;
 }
 
 export interface ContactCardData {
   trip_id: string;
+  requester_id: string;
   requester_first_name: string;
   requester_phone: string;
   requester_relation: RequesterRelation;
@@ -69,6 +70,8 @@ export interface ContactCardData {
   destination_address: string;
   destination_lat: number;
   destination_lng: number;
+  patient_age?: number | null;
+  patient_condition?: string | null;
 }
 
 export interface Report {

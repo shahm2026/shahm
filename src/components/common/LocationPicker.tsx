@@ -148,13 +148,13 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ label, placehold
   return (
     <div className="relative w-full space-y-1 text-right">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-semibold text-[#1F2430]">{label}</label>
+          <label className="block text-sm font-semibold text-[#101f17]">{label}</label>
         {allowCurrentLocation && (
           <button
             type="button"
             onClick={handleUseCurrentLocation}
             disabled={locating}
-            className="text-xs font-semibold text-[#146B44] flex items-center gap-1 disabled:opacity-50"
+            className="flex items-center gap-1 rounded-full bg-[#dbece0] px-3 py-1.5 text-xs font-semibold text-[#005131] disabled:opacity-50"
           >
             {locating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LocateFixed className="w-3.5 h-3.5" />}
             استخدم موقعي الحالي
@@ -168,7 +168,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ label, placehold
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full h-[52px] pr-10 pl-4 bg-white border border-[#8A949E] rounded-xl text-base text-[#1F2430] placeholder:text-[#6B7280] focus:border-[#2F6FED] focus:outline-none transition-colors"
+          className="w-full h-12 rounded-xl border border-[#bfc9bf] bg-white px-4 pr-10 text-base text-[#101f17] placeholder:text-[#6f7a71] shadow-sm outline-none transition focus:border-[#006d41] focus:ring-2 focus:ring-[#8df5b7]/50"
         />
         <div className="absolute right-3 text-[#6B7280]">
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
@@ -178,7 +178,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ label, placehold
       {locateError && <p className="text-xs text-[#B53A3A]">{locateError}</p>}
 
       {results.length > 0 && (
-        <ul className="absolute z-50 w-full mt-1 bg-white border border-[#8A949E] rounded-xl shadow-lg overflow-hidden divide-y divide-[#EEF0EF]">
+        <ul className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-[#bfc9bf] bg-white shadow-lg divide-y divide-[#e6f8ec]">
           {results.map((r, i) => (
             <li
               key={i}

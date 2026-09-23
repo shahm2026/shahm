@@ -40,6 +40,6 @@ export const tokens = {
     },
   },
   typography: {
-    fontFamily: "'Tajawal', 'IBM Plex Sans Arabic', system-ui, sans-serif",
+    fontFamily: "'IBM Plex Sans Arabic', 'Noto Sans Arabic', sans-serif",
   },
 } as const;
