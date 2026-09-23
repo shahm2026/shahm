@@ -13,10 +13,16 @@ type CreateTripPayload = {
   scheduled_at?: string | null;
 };
 
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+const configuredOrigins = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+const allowedOrigins = Array.from(new Set([
+  'https://shahm-app.pages.dev',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  ...configuredOrigins,
+]));
 
 const jsonHeaders = (request: Request) => {
   const requestOrigin = request.headers.get('origin') ?? '';
@@ -100,10 +106,10 @@ Deno.serve(async (request) => {
     return response(request, 401, { error: 'Authentication required' });
   }
 
-  const trustedIp = request.headers.get('cf-connecting-ip');
-  if (!trustedIp) {
-    return response(request, 400, { error: 'Trusted client IP is unavailable' });
-  }
+  const trustedIp = request.headers.get('cf-connecting-ip')
+    || request.headers.get('x-real-ip')
+    || request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+    || '0.0.0.0';
 
   const contentLength = Number(request.headers.get('content-length') ?? 0);
   if (contentLength > 32_768) {

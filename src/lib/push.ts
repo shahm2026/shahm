@@ -56,9 +56,18 @@ export async function registerPushNotifications(): Promise<boolean> {
     const userId = sessionData.session?.user.id;
     if (!userId) return false;
 
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('auth_user_id', userId)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+    if (profileError || !profile) return false;
+
     const { error } = await supabase.from('push_subscriptions').upsert(
       {
-        user_id: userId,
+        user_id: profile.id,
         subscription: JSON.parse(JSON.stringify(subscription.toJSON())),
       },
       { onConflict: 'user_id' }

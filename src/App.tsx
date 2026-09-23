@@ -9,6 +9,7 @@ import { UsageMonitor } from './components/admin/UsageMonitor';
 import { UsersPanel } from './components/admin/UsersPanel';
 import { toWhatsAppNumber } from './lib/phone';
 import { useInstallPrompt } from './lib/useInstallPrompt';
+import { registerPushNotifications } from './lib/push';
 import {
   Phone,
   MessageSquare,
@@ -146,7 +147,7 @@ export const App: React.FC = () => {
   const [sessionUser, setSessionUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [roleSelection, setRoleSelection] = useState<UserRole | null>(null);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'setup'>('login');
 
   // Admin View State
   const [adminTab, setAdminTab] = useState<'trips' | 'safety' | 'analytics' | 'usage' | 'users'>('trips');
@@ -199,7 +200,12 @@ export const App: React.FC = () => {
 
   const handleInstall = async () => {
     const installed = await install();
-    setInstallMessage(installed ? 'تم تجهيز التطبيق للاستخدام بنجاح.' : 'لم يتم التثبيت. يمكنك المحاولة لاحقاً من قائمة المتصفح.');
+    if (installed) {
+      await registerPushNotifications();
+      setInstallMessage('تم تثبيت شَهْم وتفعيل التنبيهات المتاحة على جهازك.');
+    } else {
+      setInstallMessage('لم يتم التثبيت. افتح قائمة المتصفح واختر إضافة إلى الشاشة الرئيسية.');
+    }
   };
 
   const installNotice = showInstallPrompt && !installDismissed ? (
@@ -327,7 +333,7 @@ export const App: React.FC = () => {
         } else {
           setProfile(null);
           setRoleSelection(pendingProfile?.role || null);
-          setAuthMode('signup');
+          setAuthMode('setup');
           setProfileSetupRequired(true);
         }
       } else {
@@ -351,7 +357,7 @@ export const App: React.FC = () => {
 
   const fetchVolunteerNearbyTrips = (lat: number, lng: number) => {
     supabase
-      .rpc('get_pending_trips_nearby', { p_lat: lat, p_lng: lng, p_radius_km: 20 })
+      .rpc('get_pending_trips_nearby', { p_lat: lat, p_lng: lng, p_radius_km: 7 })
       .then(({ data, error }) => {
         if (error) {
           setVolunteerLocationError(translateTripError(error.message));
@@ -381,7 +387,7 @@ export const App: React.FC = () => {
         setVolunteerLocationStatus('error');
         setVolunteerLocationError(
           error.code === error.PERMISSION_DENIED
-            ? 'محتاجين إذن الوصول لموقعك عشان نطلعلك الطلبات القريبة منك بس (٢٠ كم).'
+            ? 'محتاجين إذن الوصول لموقعك عشان نطلعلك الطلبات القريبة منك.'
             : 'تعذر تحديد موقعك الحالي، حاول تاني.'
         );
       },
@@ -515,17 +521,17 @@ export const App: React.FC = () => {
   const handleGoogleLogin = async (selectedRole?: UserRole) => {
     setErrorMessage(null);
     const role = selectedRole || roleSelection;
-    const isSignup = authMode === 'signup' && !selectedRole;
+    const isProfileSetup = authMode === 'setup' && !selectedRole;
 
     if (!role) return;
 
-    if (isSignup && (!firstName.trim() || !/^01\d{9}$/.test(phone.trim()))) {
+    if (isProfileSetup && (!firstName.trim() || !/^01\d{9}$/.test(phone.trim()))) {
       setErrorMessage('أدخل الاسم ورقم هاتف مصري صحيح يبدأ بـ 01.');
       return;
     }
 
     const parsedAge = Number(patientAge);
-    if (isSignup && role === 'requester') {
+    if (isProfileSetup && role === 'requester') {
       if (!patientAge.trim() || !Number.isFinite(parsedAge) || parsedAge < 0 || parsedAge > 120) {
         setErrorMessage('أدخل سن المريض بشكل صحيح.');
         return;
@@ -537,9 +543,9 @@ export const App: React.FC = () => {
     }
 
     const pendingProfile = JSON.stringify({
-      ...(isSignup ? { firstName: firstName.trim(), phone: phone.trim() } : {}),
+      ...(isProfileSetup ? { firstName: firstName.trim(), phone: phone.trim() } : {}),
       role,
-      ...(isSignup && role === 'requester'
+      ...(isProfileSetup && role === 'requester'
         ? { patientAge: parsedAge, patientCondition: patientCondition.trim() }
         : {}),
     });
@@ -856,39 +862,14 @@ export const App: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setAuthMode('signup');
-                  setRoleSelection(null);
+                  handleGoogleLogin('requester');
                 }}
                 className="font-bold text-[#146B44] underline underline-offset-4 transition-opacity hover:opacity-80"
               >
-                إنشاء حساب جديد
+                المتابعة كمستفيد
               </button>
             </div>
           </main>
-        </div>
-      </div>
-    );
-  }
-
-  if (!sessionUser && authMode === 'signup' && !roleSelection) {
-    return (
-      <div className="stitch-page px-4 py-6">
-        {configurationNotice}
-        <div className="mx-auto w-full max-w-[480px]">
-          <header className="stitch-header -mx-4 mb-5 flex items-center justify-between px-4 py-3">
-            <button type="button" aria-label="الرجوع" onClick={() => setAuthMode('login')} className="flex h-11 w-11 items-center justify-center rounded-full text-[#005131] hover:bg-[#dbece0]"><ArrowLeft className="h-6 w-6" /></button>
-            <div className="flex items-center gap-2"><BrandMark className="h-8 w-8" /><span className="font-bold text-[#005131]">شَهْم</span></div>
-            <UserRound className="h-5 w-5 text-[#005131]" />
-          </header>
-          <div className="stitch-soft-card mb-5 flex items-start gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#8df5b7] text-[#005131]"><HeartHandshake className="h-5 w-5" /></div>
-            <div><span className="text-xs font-bold text-[#005131]">خطوة البداية في شَهْم</span><h1 className="mt-1 text-2xl font-bold text-[#101f17]">اختار دورك في شَهْم</h1><p className="mt-1 text-sm leading-7 text-[#3f4942]">اختر كيف تود المشاركة معنا اليوم لنحافظ معًا على طريق آمن لكل مريض.</p></div>
-          </div>
-          <div className="space-y-3" role="radiogroup" aria-label="اختيار نوع الحساب">
-            <button type="button" onClick={() => setRoleSelection('volunteer')} className="stitch-card flex w-full items-start gap-4 p-5 text-right transition hover:bg-[#e6f8ec]"><div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#dbece0] text-[#005131]"><CarFront className="h-7 w-7" /></div><span><span className="block text-lg font-bold text-[#101f17]">شهم متطوع</span><span className="mt-1 block text-sm leading-7 text-[#3f4942]">أملك وسيلة تنقل ومستعد لمساعدة مريض في طريقه لموعده الطبي.</span><span className="mt-2 flex items-center gap-1 text-xs font-semibold text-[#005131]"><Shield className="h-4 w-4" /> توثيق الهوية لاحقًا</span></span></button>
-            <button type="button" onClick={() => setRoleSelection('requester')} className="stitch-card flex w-full items-start gap-4 p-5 text-right transition hover:bg-[#e6f8ec]"><div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#8df5b7] text-[#005131]"><HeartHandshake className="h-7 w-7" /></div><span><span className="block text-lg font-bold text-[#101f17]">مستفيد / صاحب طلب</span><span className="mt-1 block text-sm leading-7 text-[#3f4942]">أحتاج توصيلة لموعد طبي لنفسي أو لأحد أفراد أسرتي.</span><span className="mt-2 flex items-center gap-1 text-xs font-semibold text-[#005131]"><Shield className="h-4 w-4" /> خصوصية وحفظ للكرامة</span></span></button>
-          </div>
-          <div className="stitch-soft-card mt-5 flex items-start gap-3 p-4"><LockKeyhole className="mt-1 h-5 w-5 shrink-0 text-[#005131]" /><p className="text-xs leading-6 text-[#3f4942]">بياناتك الشخصية والطبية محمية ولا تظهر إلا للتنسيق المصرح به.</p></div>
         </div>
       </div>
     );
@@ -1410,7 +1391,15 @@ export const App: React.FC = () => {
           </>
         )}
 
-        {showVolunteerView && activeAppTab !== 'guides' && activeAppTab !== 'account' && (
+        {showVolunteerView && activeAppTab === 'request' && (
+          <section className="stitch-card space-y-4 p-5">
+            <div className="stitch-soft-card flex items-start gap-3 p-4"><Handshake className="mt-1 h-5 w-5 shrink-0 text-[#005131]" /><div><h2 className="font-bold text-[#005131]">طلب عون</h2><p className="mt-1 text-sm leading-7 text-[#3f4942]">لو أنت محتاج مشوار علاجي، استخدم حساب المستفيد حتى نربط الطلب ببياناتك الطبية والتواصل الآمن.</p></div></div>
+            <button type="button" onClick={() => handleSignOut()} className="stitch-primary-button w-full px-4 text-sm">الخروج والبدء كمستفيد</button>
+            <p className="text-center text-xs leading-6 text-[#6f7a71]">يمكنك استخدام نفس حساب Google واختيار دور المستفيد عند الدخول.</p>
+          </section>
+        )}
+
+        {showVolunteerView && activeAppTab === 'trips' && (
           <>
             <div className="stitch-soft-card flex items-start gap-3 p-4 shadow-sm">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#146b44] text-white">
@@ -1507,7 +1496,7 @@ export const App: React.FC = () => {
                 <LocateFixed className="w-8 h-8 text-[#146B44] mx-auto" />
                 <p className="text-sm font-semibold text-[#1F2430]">محتاجين نعرف موقعك الحالي</p>
                 <p className="text-xs text-[#6B7280]">
-                  عشان نطلعلك بس الطلبات اللي في نطاق ٢٠ كيلومتر منك
+                  عشان نطلعلك الطلبات القريبة منك
                 </p>
                 {volunteerLocationError && (
                   <p className="text-xs text-[#B53A3A]">{volunteerLocationError}</p>
@@ -1532,7 +1521,7 @@ export const App: React.FC = () => {
                   <div className="stitch-card p-8 text-center space-y-2">
                     <Clock className="w-8 h-8 text-[#8A949E] mx-auto" />
                     <p className="text-sm font-semibold text-[#1F2430]">مفيش طلبات قريبة منك دلوقتي</p>
-                    <p className="text-xs text-[#6B7280]">هنبلغك أول ما يظهر طلب جديد في منطقتك (نطاق ٢٠ كم)</p>
+                    <p className="text-xs text-[#6B7280]">هنبلغك أول ما يظهر طلب جديد في منطقتك</p>
                   </div>
                 ) : (
                   pendingTrips.map((trip) => (
